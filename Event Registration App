@@ -1,0 +1,643 @@
+**App.js**
+```javascript
+import React, { useState } from 'react';
+import { SafeAreaView, StyleSheet } from 'react-native';
+import RegistrationForm from './RegistrationForm';
+import Confirmation from './Confirmation';
+
+const App = () => {
+  const [registrationDetails, setRegistrationDetails] = useState(null);
+  
+  const handleConfirm = (details) => {
+    setRegistrationDetails(details);
+  };
+  
+  const handleBack = () => {
+    setRegistrationDetails(null);
+  };
+  
+  return (
+    <SafeAreaView style={styles.container}>
+      {registrationDetails ? (
+        <Confirmation details={registrationDetails} onBack={handleBack} />
+      ) : (
+        <RegistrationForm onConfirm={handleConfirm} />
+      )}
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+});
+
+export default App;
+```
+
+## 2. **RegistrationForm.js**
+```javascript
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+
+const RegistrationForm = ({ onConfirm }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [event, setEvent] = useState('Select an event');
+
+  const handleSubmit = () => {
+    if (!name || !email || !phone || event === 'Select an event') {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address.');
+      return;
+    }
+    
+    const phoneRegex = /^[0-9]{10,}$/;
+    if (!phoneRegex.test(phone.replace(/[^0-9]/g, ''))) {
+      Alert.alert('Error', 'Please enter a valid phone number (at least 10 digits).');
+      return;
+    }
+    
+    onConfirm({ name, email, phone, event });
+  };
+
+  return (
+    <ImageBackground
+      source={{ uri: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' }}
+      style={styles.backgroundImage}
+      blurRadius={5}
+    >
+      <View style={styles.overlay}>
+        <Text style={styles.title}>Event Registration Form</Text>
+        
+        <View style={styles.formContainer} testID='registrationFormDetails'>
+          <View testID='formName'>
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setName}
+              value={name}
+              placeholder="Enter your full name"
+              placeholderTextColor="#999"
+            />
+          </View>
+
+          <View testID='formEmail'>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setEmail}
+              value={email}
+              placeholder="Enter your email"
+              placeholderTextColor="#999"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View testID='formPhone'>
+            <Text style={styles.label}>Phone</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={setPhone}
+              value={phone}
+              placeholder="Enter your phone number"
+              placeholderTextColor="#999"
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View testID='formPicker'>
+            <Text style={styles.label}>Select Event</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={event}
+                style={styles.picker}
+                onValueChange={(itemValue) => setEvent(itemValue)}
+              >
+                <Picker.Item label="Select an event" value="Select an event" />
+                <Picker.Item label="Conference" value="Conference" />
+                <Picker.Item label="Workshop" value="Workshop" />
+                <Picker.Item label="Webinar" value="Webinar" />
+                <Picker.Item label="Networking Event" value="Networking Event" />
+                <Picker.Item label="Seminar" value="Seminar" />
+              </Picker>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={handleSubmit}
+            testID="registerButton"
+          >
+            <Text style={styles.buttonText}>Register</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+};
+
+const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 30,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
+  },
+  formContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    fontSize: 16,
+    backgroundColor: 'white',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    marginBottom: 20,
+    backgroundColor: 'white',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  button: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
+
+export default RegistrationForm;
+```
+
+## 3. **Confirmation.js**
+```javascript
+import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ImageBackground,
+  StyleSheet,
+} from 'react-native';
+
+const Confirmation = ({ details, onBack }) => {
+  return (
+    <ImageBackground
+      source={{ uri: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' }}
+      style={styles.backgroundImage}
+      blurRadius={5}
+    >
+      <View style={styles.overlay}>
+        <Text style={styles.title}>Event Registration Form</Text>
+        
+        <View style={styles.confirmationContainer} testID='confirmationDetails'>
+          <Text style={styles.confirmTitle} testID="confirmText">Confirmation</Text>
+          
+          <View style={styles.detailsCard}>
+            <Text style={styles.detailLabel}>Registration Successful!</Text>
+            <Text style={styles.detailText}>Your registration has been confirmed.</Text>
+            
+            <View style={styles.separator} />
+            
+            <Text style={styles.detail}>Name: <Text style={styles.detailValue}>{details.name}</Text></Text>
+            <Text style={styles.detail}>Email: <Text style={styles.detailValue}>{details.email}</Text></Text>
+            <Text style={styles.detail}>Phone: <Text style={styles.detailValue}>{details.phone}</Text></Text>
+            <Text style={styles.detail}>Event: <Text style={styles.detailValue}>{details.event}</Text></Text>
+            
+            <View style={styles.separator} />
+            
+            <Text style={styles.thankYouText}>
+              Thank you for registering! You will receive a confirmation email shortly.
+            </Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={onBack}
+            testID="backButton"
+          >
+            <Text style={styles.buttonText}>Back to Registration</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+};
+
+const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    padding: 20,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 30,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 10,
+  },
+  confirmationContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
+    padding: 25,
+  },
+  confirmTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  detailsCard: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 25,
+  },
+  detailLabel: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  detailText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  detail: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  detailValue: {
+    fontWeight: '400',
+    color: '#555',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 20,
+  },
+  thankYouText: {
+    fontSize: 16,
+    color: '#4CAF50',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
+
+export default Confirmation;
+```
+
+## 4. **package.json**
+```json
+{
+  "name": "EventRegistrationApp",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~49.0.0",
+    "expo-status-bar": "~1.6.0",
+    "react": "18.2.0",
+    "react-native": "0.72.6",
+    "@react-native-picker/picker": "2.4.8",
+    "react-native-web": "~0.19.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true
+}
+```
+
+## 5. **README.md**
+```markdown
+# Event Registration App
+
+A React Native application for event registration with form validation and confirmation screen.
+
+## Features
+
+- 📝 User registration form with Name, Email, Phone inputs
+- 📅 Event selection dropdown (Conference, Workshop, Webinar, etc.)
+- ✅ Form validation and error handling
+- ✅ Confirmation screen with user details
+- 🎨 Beautiful UI with background images and blur effects
+- 📱 Responsive design for mobile and web
+
+## Screenshots
+
+### Registration Form
+![Registration Form](https://via.placeholder.com/300x600/4A90E2/FFFFFF?text=Registration+Form)
+
+### Confirmation Screen
+![Confirmation Screen](https://via.placeholder.com/300x600/4CAF50/FFFFFF?text=Confirmation+Screen)
+
+## Technologies Used
+
+- React Native
+- React Native Picker
+- React Hooks (useState)
+- React Native Components (TextInput, TouchableOpacity, etc.)
+- Expo
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ewuwise/EventRegistrationApp.git
+cd EventRegistrationApp
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Run the application:
+```bash
+npm run web
+```
+
+For mobile:
+```bash
+# iOS
+npm run ios
+
+# Android
+npm run android
+```
+
+## Project Structure
+
+```
+EventRegistrationApp/
+├── App.js               # Main application component
+├── RegistrationForm.js  # Registration form component
+├── Confirmation.js      # Confirmation screen component
+├── package.json         # Dependencies and scripts
+└── README.md           # This file
+```
+
+## Testing IDs
+
+The application includes test IDs for automated testing:
+
+- `formName` - Name input field container
+- `formEmail` - Email input field container
+- `formPhone` - Phone input field container
+- `formPicker` - Event picker container
+- `registrationFormDetails` - Registration form container
+- `confirmationDetails` - Confirmation screen container
+- `confirmText` - Confirmation text
+- `registerButton` - Register button
+- `backButton` - Back button
+
+## Features in Detail
+
+### Registration Form
+- Validates all required fields
+- Email format validation
+- Phone number validation
+- Dropdown event selection
+- Error alerts for missing/invalid data
+
+### Confirmation Screen
+- Displays user registration details
+- Shows success message
+- Allows returning to registration form
+
+## License
+
+MIT License
+```
+
+## 6. **.gitignore**
+```gitignore
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production build
+.expo/
+.expo-shared/
+.expo-web/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+web-build/
+
+# Temporary files
+tmp/
+temp/
+```
+
+## 7. **babel.config.js** (Optional but recommended)
+```javascript
+module.exports = function(api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+  };
+};
+```
+
+## 8. **app.json** (Optional but recommended for Expo)
+```json
+{
+  "expo": {
+    "name": "EventRegistrationApp",
+    "slug": "EventRegistrationApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
+```
+
+## **Folder Structure**
+
+Your complete folder structure should look like this:
+```
+EventRegistrationApp/
+├── App.js
+├── RegistrationForm.js
+├── Confirmation.js
+├── package.json
+├── README.md
+├── .gitignore
+├── babel.config.js      (optional)
+└── app.json            (optional)
+```
+
+## **Quick Setup Commands**
+
+To quickly create all these files, you can run:
+
+```bash
+# Create directory structure
+mkdir -p EventRegistrationApp
+cd EventRegistrationApp
+
+# Create all files
+echo "<App.js content>" > App.js
+echo "<RegistrationForm.js content>" > RegistrationForm.js
+echo "<Confirmation.js content>" > Confirmation.js
+echo "<package.json content>" > package.json
+echo "<README.md content>" > README.md
+echo "<.gitignore content>" > .gitignore
+
+# Initialize git and push
+git init
+git add .
+git commit -m "Initial commit: Event Registration App"
+git remote add origin https://github.com/ewuwise/EventRegistrationApp.git
+git branch -M main
+git push -u origin main
+```
+
+**Note:** Replace `<file content>` with the actual code from above for each file.
+
+This gives you a complete, working React Native Event Registration App ready to be deployed 
